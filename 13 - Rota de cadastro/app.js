@@ -1,54 +1,58 @@
-// Importar módulo express
-const express = require('express');
+const express = require("express");
+const cors = require("cors");
 
-// importar módulo express-handlebars
-const { engine } = require('express-handlebars');
-
-// Importar módulo mysql
-const mysql = require('mysql2');
-
-// App
 const app = express();
-
-// Adicionar bootstrap
-app.use('/bootstrap', express.static('node_modules/bootstrap/dist'));
-// Adicionar css
-
-app.use('/css', express.static('./css'));
-
-// Configuração do handlebars
-
-app.engine('handlebars', engine());
-app.set('view engine', 'handlebars');
-app.set('views', './views');
-
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended:false}));
 
-// Conexão com o banco de dados
-const Conexao = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Gabibi89*',
-    database: 'projeto'
-}); 
-// Conectar
-Conexao.connect(function(err){
-    if(err) throw err;
-    console.log('Conectado com sucesso!');
-}
-);
-// Rota principal
-app.get('/', function(req, res){
-    res.render('formulario');  
+let currentValue = "0";
+let prevValue = null;
+let operator = null;
+
+app.post("/", (req, res) => {
+  const { value } = req.body;
+
+  if (!isNaN(value)) {
+    currentValue = currentValue === "0" ? value : currentValue + value;
+  } else if (["+", "-", "*", "/"].includes(value)) {
+    prevValue = currentValue;
+    operator = value;
+    currentValue = "0";
+  } else if (value === "=") {
+    if (operator && prevValue !== null) {
+      const a = parseFloat(prevValue);
+      const b = parseFloat(currentValue);
+      let result;
+      switch (operator) {
+        case "+":
+          result = a + b;
+          break;
+        case "-":
+          result = a - b;
+          break;
+        case "*":
+          result = a * b;
+          break;
+        case "/":
+          result = b !== 0 ? a / b : "Erro";
+          break;
+        default:
+          return;
+      }
+      currentValue = String(result);
+      operator = null;
+      prevValue = null;
+    }
+  } else if (value === "C") {
+    currentValue = "0";
+    prevValue = null;
+    operator = null;
+  }
+  res.json({ display: currentValue });
 });
-// Rota de cadastro
-app.post('/cadastrar', function(req, res){
-    
-        console.log(req.body);
-        res.end();
-    });
-    // Redirecionar
 
-// Servidor
-app.listen(8080);
+app.listen(8080, () => {
+  console.log('Rodando app listening at http://localhost:8080');
+});
+
+
