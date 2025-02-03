@@ -12,6 +12,9 @@ app.get('/', (req, res) => {
 });
 
 // Iniciar o servidor
-app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-});
+
+    
+
+app.listen(8080, () => {
+    console.log('Rodando app listening at http://localhost:8080');
+    });
