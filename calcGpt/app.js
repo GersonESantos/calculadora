@@ -9,7 +9,7 @@ let currentValue = "0";
 let prevValue = null;
 let operator = null;
 
-app.post("/calculate", (req, res) => {
+app.post("/", (req, res) => {
   const { value } = req.body;
 
   if (!isNaN(value)) {
